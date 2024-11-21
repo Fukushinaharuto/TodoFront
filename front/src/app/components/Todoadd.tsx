@@ -16,23 +16,9 @@ const Todoadd = () => {
     const [dueDate, setDueDate] = useState<string>("");
     const [query, setQuery] = useState<string>("");
 
-    const helloLaravelApi = async():Promise<void> => {
-        try {
-        const response = await axios.get<TodoMold[]>(`http://127.0.0.1:8002/api/todos/`,{
-            params: { query },
-        }
-        );
-        console.log(response);
-        setTodos(response.data);
-    } catch (error) {
-        console.error("APIエラー",error);
-    }
-    
-    }
-
     const handleStatusChange = async(id:number, newStatus:boolean):Promise<void> => {
         try{
-            const response = await axios.patch<TodoMold[]>(`http://127.0.0.1:8002/api/todos/${id}`,{
+            await axios.patch<TodoMold[]>(`http://127.0.0.1:8002/api/todos/${id}`,{
                 status:newStatus,
             });
 
@@ -54,6 +40,7 @@ const Todoadd = () => {
                 title:newTodo,
                 due_date:dueDate || null,
                 status:false,
+                
             })
 
             setTodos((prevTodos) => [...prevTodos, response.data]);
@@ -79,6 +66,20 @@ const Todoadd = () => {
     
 
     useEffect(() => {
+        const helloLaravelApi = async():Promise<void> => {
+            try {
+            const response = await axios.get<TodoMold[]>(`http://127.0.0.1:8002/api/todos/`,{
+                params: { query },
+            }
+            );
+            console.log(response);
+            setTodos(response.data);
+        } catch (error) {
+            console.error("APIエラー",error);
+        }
+        
+        }
+        
         helloLaravelApi();
     },[query]);
 
@@ -113,9 +114,9 @@ const Todoadd = () => {
             </div>
 
             <TodoSearch 
-            
-            query={query}
-            setQuery={setQuery}/>
+                query={query}
+                setQuery={setQuery}
+            />
 
             <ul className="space-y-7 sm:text-2xl mx-4">
                 {todos.length > 0 ? (

@@ -12,5 +12,10 @@ RUN apt-get update && \
 
 RUN npm install axios
 
+
+
+
+
+
 EXPOSE 3000
 CMD ["npm","run","dev"]
