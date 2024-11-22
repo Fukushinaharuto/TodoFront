@@ -1,11 +1,15 @@
-import Todoadd from '@/app/components/Todoadd'
+import Todoadd from '@/app/components/Todoadd';
+import Logout from "@/app/components/Auth/Logout";
+import UserName from "@/app/components/Auth/UserName";
 
 function Todos() {
     
 
     return (
         <div>
-            <Todoadd></Todoadd>
+            <UserName/>
+            <Logout/>
+            <Todoadd/>
         </div>
     );
 }
