@@ -6,21 +6,13 @@ import { useState } from "react";
 
 const Logout = () => {
 
-    const redirectLogin = useRouter();
+    const router = useRouter();
     const [error, setError] = useState<string|null>(null);
 
     const handleLogout = async() => {
-        setError(null);
-        try{
-            await axios.post(`http://127.0.0.1:8002/api/logout`, {}, {
-                withCredentials: true,
-            });
-            redirectLogin.push("/login");
-        }catch(error){
-            console.error("ログアウトのエラー", error);
-            setError("ログアウトに失敗しました。もう一度お試しください。");
-        }
-    }
+        localStorage.removeItem('authToken');
+        router.push('/login');
+    };
     return(
         <div>
             {error && <p className="text-red-500">{error}</p>}

@@ -2,34 +2,40 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 
+interface loginUserProps {
+  name:string;
+}
 const UserName = () => {
-    const [userName, setUserName] = useState<string|null>(null);
-    const [error, setError] = useState<string|null>(null);
-
-    useEffect(() => {
-        async function fetchUserName() {
-          try {
-            const response = await axios.get("http://127.0.0.1:8002/api/check-login", {
-              withCredentials: true,
-            });
-            setUserName(response.data.user?.name || "ゲスト");
-          } catch (error: any) {
-            if (error.response && error.response.status === 401) {
-              setError("ログインしていません");
-            } else {
-              setError("エラーが発生しました");
-            }
+  const [userName, setUserName] = useState<string|null>(null);
+  const [error, setError] = useState<string|null>(null);
+ 
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+  
+    const loginUser = async() => {
+      try{
+        const response = await axios.get<loginUserProps>(`http://127.0.0.1:8002/api/userName`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        }
-    
-        fetchUserName();
-      }, []);
-    
-      if (error) {
-        return <p>{error}</p>;
+        )
+        setUserName(response.data.name);
+      }catch(error){
+        console.error('ユーザネームのエラー', error);
+        setError('ユーザーの名前が取得できませんでした。再度ログインしください。')
       }
-    
-      return <p>ログインユーザー: {userName}</p>;
-    
+    }
+    loginUser();
+  },[])
+  return(
+    <div>
+      <p>ユーザー名:{ userName }</p>
+      <p>{ error }</p>
+    </div>
+  )
+
+
 }
 export default UserName;

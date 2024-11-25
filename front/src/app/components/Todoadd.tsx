@@ -6,21 +6,37 @@ import { TodoMold } from '@/app/type';
 import TodoUpdate from '@/app/components/TodoUpdate';
 import TodoDelete from '@/app/components/TodoDelete';
 import TodoSearch from "@/app/components/TodoSearch";
+import { useRouter } from "next/navigation";
+
 
 
 
 const Todoadd = () => {
+    const token = localStorage.getItem('authToken');
+    const router = useRouter();
+    if(!token){
+        console.error("アクセストークンが存在しません")
+        router.push('/login');
+        
+
+    }
 
     const [todos, setTodos] = useState<TodoMold[]>([]);
     const [newTodo, setNewTodo] = useState<string>("");
     const [dueDate, setDueDate] = useState<string>("");
     const [query, setQuery] = useState<string>("");
+    
 
     const handleStatusChange = async(id:number, newStatus:boolean):Promise<void> => {
         try{
-            await axios.patch<TodoMold[]>(`http://127.0.0.1:8002/api/todos/${id}`,{
-                status:newStatus,
-            });
+            await axios.patch<TodoMold[]>(`http://127.0.0.1:8002/api/todos/${id}`,
+                {status:newStatus},
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                }
+            );
 
         
             setTodos((prevTodos) => 
@@ -36,12 +52,17 @@ const Todoadd = () => {
     const handleAddTodo = async():Promise<void> => {
         if (!newTodo.trim()) return;
         try{
-            const response = await axios.post<TodoMold>(`http://127.0.0.1:8002/api/todos/`, {
+            const response = await axios.post<TodoMold>(`http://127.0.0.1:8002/api/todos/`, 
+                {
                 title:newTodo,
                 due_date:dueDate || null,
                 status:false,
-                
-            })
+                },{
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                }
+            )
 
             setTodos((prevTodos) => [...prevTodos, response.data]);
             setNewTodo("");
@@ -54,7 +75,13 @@ const Todoadd = () => {
 
     const handleDeleteTodo = async(id:number):Promise<void> => {
         try{
-            await axios.delete(`http://127.0.0.1:8002/api/todos/${id}`);
+            await axios.delete(`http://127.0.0.1:8002/api/todos/${id}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
                 setTodos((prevTodos) => prevTodos.filter((todo) =>todo.id !== id));
         }catch(error){
             console.error("削除のエラー", error);
@@ -68,15 +95,19 @@ const Todoadd = () => {
     useEffect(() => {
         const helloLaravelApi = async():Promise<void> => {
             try {
-            const response = await axios.get<TodoMold[]>(`http://127.0.0.1:8002/api/todos/`,{
-                params: { query },
+
+                const response = await axios.get<TodoMold[]>(`http://127.0.0.1:8002/api/todos/`,{
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    params: { query },
+                }
+                );
+                console.log(response);
+                setTodos(response.data);
+            } catch (error) {
+                console.error("APIエラー",error);
             }
-            );
-            console.log(response);
-            setTodos(response.data);
-        } catch (error) {
-            console.error("APIエラー",error);
-        }
         
         }
         
@@ -84,13 +115,9 @@ const Todoadd = () => {
     },[query]);
 
     return (
-        <div>
+        <div className="p-2">
             
-            <div className="bg-blue-100">
-                <div className="max-w-5xl mx-auto p-3">
-                    <h1 className="text-5xl">Todoアプリ</h1>
-                </div>
-            </div>
+            
             <div className="max-w-5xl mx-auto">
                 <input 
                     type="text"

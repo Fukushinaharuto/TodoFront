@@ -13,7 +13,7 @@ const TodoSearch:React.FC<TodoSearchProps> = ({ query, setQuery }) => {
     
 
     return (
-        <div>
+        <div className="max-w-5xl mx-auto">
             <input 
                 type="text" 
                 value={query}

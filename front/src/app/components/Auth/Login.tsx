@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 interface LoginProps {
     email: string;
     password: string;
+    token:string;
 }
 
 const AuthLogin = () => {
@@ -22,23 +23,20 @@ const AuthLogin = () => {
 
         try {
             // リクエストにwithCredentialsを追加して、クッキーを送信する
-            await axios.post<LoginProps>(`http://127.0.0.1:8002/api/login`, {
+            const response = await axios.post<LoginProps>(`http://127.0.0.1:8002/api/login`, {
                 email,
                 password,
-            }, {
-                withCredentials: true, // クッキーを送信
             });
+            const token  = response.data.token;
+
+            localStorage.setItem('authToken', token);
 
             setSuccess(true);
             // ログイン成功後、Todoページへリダイレクト
             router.push("/todos");
         } catch (error) {
-            if (axios.isAxiosError(error) && error.response) {
-                console.error("ログインエラー", error.response.data);
-                setError(`ログインに失敗しました: ${error.response.data.message || '不明なエラー'}`);
-            } else {
-                setError("ログインに失敗しました。サーバーに接続できません。");
-            }
+            console.error("ログインエラー", error);
+            setError("ログインに失敗しました")
         }
     };
 

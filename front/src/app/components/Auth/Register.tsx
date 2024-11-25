@@ -4,14 +4,17 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 
 interface RegisterProps {
-    name:string;
-    email:string;
-    password:string;
+    user:{
+        name:string;
+        email:string;
+        password:string;
+    }
+    token:string;
 };
 
 const AuthRegister = () => {
 
-    const redirectLogin = useRouter();
+    const router = useRouter();
     
     const [name, setName] = useState<string>('');
     const [email, setEmail] = useState<string>('');
@@ -34,14 +37,17 @@ const AuthRegister = () => {
             return;
         }
         try{
-            await axios.post<RegisterProps>(`http://127.0.0.1:8002/api/register`, {
+            const response = await axios.post<RegisterProps>(`http://127.0.0.1:8002/api/register`, {
                 name,
                 email,
                 password,
                 password_confirmation: passwordConfirmation,
             });
+            const { token } = response.data
+            localStorage.setItem('authToken', token);
+
             setSuccess(true);
-            redirectLogin.push("/login");
+            router.push("/login");
         }catch (error) {
             setError("新規登録に失敗しました。入力内容をご確認ください。");
             console.error("新規登録のエラー", error);
