@@ -14,12 +14,12 @@ import { useRouter } from "next/navigation";
 const Todoadd = () => {
     const token = localStorage.getItem('authToken');
     const router = useRouter();
-    if(!token){
-        console.error("アクセストークンが存在しません")
-        router.push('/login');
-        
-
-    }
+    useEffect(() => {
+            if(token === 'undefined'){
+            console.error("アクセストークンが存在しません")
+            router.push('/login');
+        }
+    },);
 
     const [todos, setTodos] = useState<TodoMold[]>([]);
     const [newTodo, setNewTodo] = useState<string>("");
@@ -93,6 +93,7 @@ const Todoadd = () => {
     
 
     useEffect(() => {
+        
         const helloLaravelApi = async():Promise<void> => {
             try {
 
@@ -130,14 +131,16 @@ const Todoadd = () => {
                     type="date"
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
-                    className="text-2xl border-2 border-gray-400 p-2 rounded-md w-full my-3"
+                    className="text-2xl border-2 border-gray-400 p-2 rounded-md my-3 w-44"
                 />
-                <button
-                    onClick={handleAddTodo}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                >
-                    Todoを追加
-                </button>
+                <div className="flex justify-end">
+                    <button
+                        onClick={handleAddTodo}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                    >
+                        Todoを追加
+                    </button>
+                </div>
             </div>
 
             <TodoSearch 
@@ -145,7 +148,7 @@ const Todoadd = () => {
                 setQuery={setQuery}
             />
 
-            <ul className="space-y-7 sm:text-2xl mx-4">
+            <ul className="space-y-7 sm:text-2xl max-w-5xl mx-auto">
                 {todos.length > 0 ? (
                     todos.map((todo) => (
                         <li key={todo.id} className="flex justify-between items-center">

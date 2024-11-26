@@ -2,13 +2,13 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 
-interface loginUserProps {
+export interface loginUserProps {
   name:string;
+  email:string;
 }
 const UserName = () => {
   const [userName, setUserName] = useState<string|null>(null);
-  const [error, setError] = useState<string|null>(null);
- 
+
   useEffect(() => {
     const token = localStorage.getItem('authToken');
   
@@ -24,15 +24,13 @@ const UserName = () => {
         setUserName(response.data.name);
       }catch(error){
         console.error('ユーザネームのエラー', error);
-        setError('ユーザーの名前が取得できませんでした。再度ログインしください。')
       }
     }
     loginUser();
   },[])
   return(
     <div>
-      <p>ユーザー名:{ userName }</p>
-      <p>{ error }</p>
+      <p>{ userName }</p>
     </div>
   )
 
