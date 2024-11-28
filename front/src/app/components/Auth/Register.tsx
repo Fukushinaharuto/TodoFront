@@ -22,13 +22,12 @@ const AuthRegister = () => {
     const [password, setPassword] = useState<string>('');
     const [passwordConfirmation, setPasswordConfirmation] = useState<string>('');
     const [error, setError] = useState<string>('');
-    const [success, setSuccess] = useState<boolean>(false)
+    
 
     const handleRegister = async(e: React.FormEvent) => {
         e.preventDefault();
         setError(''); // 送信時にエラーをリセット
-        setSuccess(false); // 送信時に成功メッセージをリセット
-
+        
         if (password !== passwordConfirmation) {
             setError("パスワードが一致しません。");
             return;
@@ -47,7 +46,7 @@ const AuthRegister = () => {
             const { token } = response.data
             localStorage.setItem('authToken', token);
 
-            setSuccess(true);
+            
             router.push("/login");
         }catch (error) {
             setError("新規登録に失敗しました。入力内容をご確認ください。");

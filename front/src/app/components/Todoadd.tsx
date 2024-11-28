@@ -157,6 +157,7 @@ const Todoadd = () => {
                                 todo={todo}
                                 onStatusChange={handleStatusChange}
                             />
+                            
                             <TodoDelete
                                 todoId={todo.id}
                                 onDelete={handleDeleteTodo}

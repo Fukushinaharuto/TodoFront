@@ -14,12 +14,21 @@ interface handleProfileProps{
 const UserUpdate = () => {
     const token = localStorage.getItem('authToken');
     const router = useRouter();
+    const passwordAuth = localStorage.getItem('passwordAuth');
     useEffect(() => {
         if(token === 'undefined'){
         console.error("アクセストークンが存在しません")
         router.push('/login');
-    }
-    },);
+        }
+        if(passwordAuth === "false"){
+            alert("現在のパスワードを入力してください")
+            router.push('/todos/userFetch');
+        }
+        return () => {
+            localStorage.removeItem('passwordAuth');
+        };
+    
+    },[]);
 
 
     const [name, setName] = useState<string>("");
@@ -85,7 +94,7 @@ const UserUpdate = () => {
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <div className="max-w-md w-full bg-white p-6 rounded-lg shadow-md">
-                <h1 className="text-3xl text-center mb-6">プロフィール</h1>
+                <h1 className="text-3xl text-center mb-6">プロフィールの編集</h1>
                 <ul className="space-y-4">
                     <li>
                         <label className="block text-gray-700">名前</label>
@@ -126,6 +135,8 @@ const UserUpdate = () => {
                         />
                     </li>
                 </ul>
+
+
                 
                 <button
                     onClick={handleProfile}
