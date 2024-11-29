@@ -7,6 +7,7 @@ import TodoUpdate from '@/app/components/TodoUpdate';
 import TodoDelete from '@/app/components/TodoDelete';
 import TodoSearch from "@/app/components/TodoSearch";
 import { useRouter } from "next/navigation";
+import TodoEdit from "@/app/components/TodoEdit";
 
 
 
@@ -29,7 +30,7 @@ const Todoadd = () => {
 
     const handleStatusChange = async(id:number, newStatus:boolean):Promise<void> => {
         try{
-            await axios.patch<TodoMold[]>(`http://127.0.0.1:8002/api/todos/${id}`,
+            await axios.patch<TodoMold[]>(`http://127.0.0.1:8002/api/todos/${id}/toggleStatus`,
                 {status:newStatus},
                 {
                     headers: {
@@ -113,7 +114,7 @@ const Todoadd = () => {
         }
         
         helloLaravelApi();
-    },[query]);
+    },[query, todos]);
 
     return (
         <div className="p-2">
@@ -152,16 +153,23 @@ const Todoadd = () => {
                 {todos.length > 0 ? (
                     todos.map((todo) => (
                         <li key={todo.id} className="flex justify-between items-center">
+                            
                             <TodoUpdate
                                 
                                 todo={todo}
                                 onStatusChange={handleStatusChange}
                             />
+                            <div className="flex justify-end space-x-2">
+                                <TodoEdit
+                                    todo={todo}
+                                    
+                                />
+                                <TodoDelete
+                                    todoId={todo.id}
+                                    onDelete={handleDeleteTodo}
+                                />
+                            </div>
                             
-                            <TodoDelete
-                                todoId={todo.id}
-                                onDelete={handleDeleteTodo}
-                            />
                         </li>
                     ))
                 ) : (
