@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { TodoMold } from '@/app/type';
 import TodoUpdate from '@/app/components/TodoUpdate';
@@ -8,9 +8,6 @@ import TodoDelete from '@/app/components/TodoDelete';
 import TodoSearch from "@/app/components/TodoSearch";
 import { useRouter } from "next/navigation";
 import TodoEdit from "@/app/components/TodoEdit";
-
-
-
 
 const Todoadd = () => {
     const token = localStorage.getItem('authToken');
@@ -20,18 +17,18 @@ const Todoadd = () => {
             console.error("アクセストークンが存在しません")
             router.push('/login');
         }
-    },);
+    },[]);
 
     const [todos, setTodos] = useState<TodoMold[]>([]);
     const [newTodo, setNewTodo] = useState<string>("");
     const [dueDate, setDueDate] = useState<string>("");
     const [query, setQuery] = useState<string>("");
-    
 
-    const handleStatusChange = async(id:number, newStatus:boolean):Promise<void> => {
-        try{
+    // useCallbackを使用して関数をメモ化
+    const handleStatusChange = useCallback(async (id: number, newStatus: boolean): Promise<void> => {
+        try {
             await axios.patch<TodoMold[]>(`http://127.0.0.1:8002/api/todos/${id}/toggleStatus`,
-                {status:newStatus},
+                { status: newStatus },
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -39,43 +36,43 @@ const Todoadd = () => {
                 }
             );
 
-        
-            setTodos((prevTodos) => 
+            setTodos((prevTodos) =>
                 prevTodos.map((todo) =>
-                    todo.id === id ? {...todo, status: newStatus} : todo
+                    todo.id === id ? { ...todo, status: newStatus } : todo
                 )
             );
-        }catch(error){
+        } catch (error) {
             console.error("statusのエラー", error);
         }
-    }
+    }, [token]);
 
-    const handleAddTodo = async():Promise<void> => {
+    const handleAddTodo = useCallback(async (): Promise<void> => {
         if (!newTodo.trim()) return;
-        try{
-            const response = await axios.post<TodoMold>(`http://127.0.0.1:8002/api/todos/`, 
+        try {
+            const response = await axios.post<TodoMold>(`http://127.0.0.1:8002/api/todos/`,
                 {
-                title:newTodo,
-                due_date:dueDate || null,
-                status:false,
-                },{
-                headers: {
-                    Authorization: `Bearer ${token}`,
+                    title: newTodo,
+                    due_date: dueDate || null,
+                    status: false,
                 },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 }
             )
 
             setTodos((prevTodos) => [...prevTodos, response.data]);
             setNewTodo("");
             setDueDate("");
-        }catch(error){
+        } catch (error) {
             console.error("追加のエラー", error);
         }
-        
-    }
 
-    const handleDeleteTodo = async(id:number):Promise<void> => {
-        try{
+    }, [newTodo, dueDate, token]);
+
+    const handleDeleteTodo = useCallback(async (id: number): Promise<void> => {
+        try {
             await axios.delete(`http://127.0.0.1:8002/api/todos/${id}`,
                 {
                     headers: {
@@ -83,52 +80,47 @@ const Todoadd = () => {
                     },
                 }
             );
-                setTodos((prevTodos) => prevTodos.filter((todo) =>todo.id !== id));
-        }catch(error){
+            setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+        } catch (error) {
             console.error("削除のエラー", error);
         }
-    }
-
-    
-    
-    
+    }, [token]);
 
     useEffect(() => {
-        
-        const helloLaravelApi = async():Promise<void> => {
+
+        const helloLaravelApi = async (): Promise<void> => {
             try {
 
-                const response = await axios.get<TodoMold[]>(`http://127.0.0.1:8002/api/todos/`,{
+                const response = await axios.get<TodoMold[]>(`http://127.0.0.1:8002/api/todos/`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                     params: { query },
-                }
-                );
+                });
                 console.log(response);
                 setTodos(response.data);
             } catch (error) {
-                console.error("APIエラー",error);
+                console.error("APIエラー", error);
             }
-        
+
         }
-        
+
         helloLaravelApi();
-    },[query, todos]);
+    }, [query, token, todos]);  // queryとtokenのみ依存配列に追加
 
     return (
         <div className="p-2">
-            
-            
+
+
             <div className="max-w-5xl mx-auto">
-                <input 
+                <input
                     type="text"
                     value={newTodo}
                     onChange={(e) => setNewTodo(e.target.value)}
                     placeholder="新しいTodoを入力"
                     className="text-2xl border-2 border-gray-400 p-2 rounded-md w-full my-3"
                 />
-                <input 
+                <input
                     type="date"
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
@@ -144,7 +136,7 @@ const Todoadd = () => {
                 </div>
             </div>
 
-            <TodoSearch 
+            <TodoSearch
                 query={query}
                 setQuery={setQuery}
             />
@@ -153,23 +145,23 @@ const Todoadd = () => {
                 {todos.length > 0 ? (
                     todos.map((todo) => (
                         <li key={todo.id} className="flex justify-between items-center">
-                            
+
                             <TodoUpdate
-                                
+
                                 todo={todo}
                                 onStatusChange={handleStatusChange}
                             />
                             <div className="flex justify-end space-x-2">
                                 <TodoEdit
                                     todo={todo}
-                                    
+
                                 />
                                 <TodoDelete
                                     todoId={todo.id}
                                     onDelete={handleDeleteTodo}
                                 />
                             </div>
-                            
+
                         </li>
                     ))
                 ) : (
@@ -178,7 +170,6 @@ const Todoadd = () => {
             </ul>
         </div>
     );
-
-
 }
+
 export default Todoadd;
